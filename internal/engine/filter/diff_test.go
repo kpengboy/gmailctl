@@ -34,7 +34,7 @@ func TestNoDiff(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	assert.Nil(t, err)
 	// No difference even if the ID is present in only one of them.
 	assert.True(t, fd.Empty())
@@ -67,7 +67,7 @@ func TestDiffOutput(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	assert.Nil(t, err)
 
 	expected := `
@@ -121,7 +121,7 @@ func TestDiffOutputWithCustomContextLines(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, 1 /* contextLines */)
+	fd, err := Diff(prev, curr, false, 1 /* contextLines */, false /* allowColor */)
 	assert.Nil(t, err)
 
 	expected := `
@@ -172,7 +172,7 @@ func TestDiffOutputWithGmailSearchURL(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, true, contextLines)
+	fd, err := Diff(prev, curr, true, contextLines, false /* allowColor */)
 	assert.Nil(t, err)
 
 	expected := `
@@ -266,7 +266,7 @@ func TestDiffAddRemove(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	expected := FiltersDiff{
 		Added:        Filters{curr[0]},
 		Removed:      Filters{prev[1]},
@@ -306,7 +306,7 @@ func TestDiffReorder(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	assert.Nil(t, err)
 	assert.Len(t, fd.Added, 0)
 	assert.Len(t, fd.Removed, 0)
@@ -342,7 +342,7 @@ func TestDiffModify(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	expected := FiltersDiff{
 		Added:        Filters{curr[1]},
 		Removed:      Filters{prev[1]},
@@ -391,7 +391,7 @@ func TestDiffAdd(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	expected := FiltersDiff{
 		Added:        Filters{curr[2]},
 		ContextLines: contextLines,
@@ -414,7 +414,7 @@ func TestDiffRemove(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	expected := FiltersDiff{
 		Removed:      Filters{prev[2], prev[0]},
 		ContextLines: contextLines,
@@ -445,7 +445,7 @@ func TestDuplicate(t *testing.T) {
 		},
 	}
 
-	fd, err := Diff(prev, curr, false, contextLines)
+	fd, err := Diff(prev, curr, false, contextLines, false /* allowColor */)
 	assert.Nil(t, err)
 	// Only one of the two identical filters is present
 	assert.Equal(t, curr[1:], fd.Added)
