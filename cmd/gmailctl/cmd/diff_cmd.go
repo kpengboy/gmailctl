@@ -7,12 +7,14 @@ import (
 
 	papply "github.com/mbrt/gmailctl/internal/engine/apply"
 	"github.com/mbrt/gmailctl/internal/errors"
+	"github.com/mbrt/gmailctl/internal/reporting"
 )
 
 var (
 	diffFilename string
 	diffDebug    bool
 	diffContext  int
+	diffColor    string
 )
 
 // diffCmd represents the diff command
@@ -40,13 +42,19 @@ func init() {
 
 	// Flags and configuration settings
 	diffCmd.PersistentFlags().StringVarP(&diffFilename, "filename", "f", "", "configuration file")
-	diffCmd.PersistentFlags().BoolVarP(&diffDebug, "debug", "", false, "print extra debugging information")
-	diffCmd.PersistentFlags().IntVarP(&diffContext, "context", "", papply.DefaultContextLines, "number of lines of filter diff context to show")
+	diffCmd.PersistentFlags().BoolVar(&diffDebug, "debug", false, "print extra debugging information")
+	diffCmd.PersistentFlags().IntVar(&diffContext, "context", papply.DefaultContextLines, "number of lines of filter diff context to show")
+	diffCmd.PersistentFlags().StringVar(&diffColor, "color", "auto", "whether to enable color output (must be \"always\", \"auto\" or \"never\")")
 }
 
 func diff(path string) error {
 	if diffContext < 0 {
 		return errors.New("--context must be non-negative")
+	}
+
+	useColor, err := reporting.ShouldUseColorDiff(diffColor, "color")
+	if err != nil {
+		return err
 	}
 
 	parseRes, err := parseConfig(path, "", false)
@@ -64,7 +72,7 @@ func diff(path string) error {
 		return err
 	}
 
-	diff, err := papply.Diff(parseRes.Res.GmailConfig, upstream, diffDebug, diffContext)
+	diff, err := papply.Diff(parseRes.Res.GmailConfig, upstream, diffDebug, diffContext, useColor)
 	if err != nil {
 		return fmt.Errorf("cannot compare upstream with local config: %w", err)
 	}
